@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xavier's College Chatbot</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chat-container {
+            width: 400px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 600px;
+        }
+        .chat-header {
+            background-color: #b40827;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .chat-box {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: scroll;
+            background-color: #f9f9f9;
+        }
+        .chat-message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 75%;
+        }
+        .chat-message.user {
+            background-color:#f897a9 ;
+            align-self: flex-end;
+            text-align: right;
+        }
+        .chat-message.bot {
+            background-color: #f1f1f1;
+            align-self: flex-start;
+        }
+        .chat-footer {
+            padding: 10px;
+            display: flex;
+            background-color: #eee;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+        button {
+            background-color: #da062d;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-left: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #cf5050;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">College Information Chatbot</div>
+    
+    <div class="chat-box" id="chat-box">
+        <!-- Chat messages will be appended here -->
+    </div>
+
+    <div class="chat-footer">
+        <input type="text" id="query" placeholder="Ask a question...">
+        <button onclick="sendQuery()">Send</button>
+    </div>
+</div>
+
+<script>
+function appendMessage(sender, message) {
+    const chatBox = document.getElementById('chat-box');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${sender}`;
+    messageDiv.innerText = message;
+    chatBox.appendChild(messageDiv);
+    chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the bottom
+}
+
+function sendQuery() {
+    const query = document.getElementById('query').value;
+    
+    if (!query.trim()) return;
+
+    // Append user's message to chat
+    appendMessage('user', query);
+
+    // Send query to the Flask API
+    fetch('http://127.0.0.1:5000/chatbot', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query: query })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Append bot's response to chat
+        appendMessage('bot', data.answer);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        appendMessage('bot', 'Sorry, something went wrong!');
+    });
+
+    // Clear input field
+    document.getElementById('query').value = '';
+}
+</script>
+
+</body>
+</html>
